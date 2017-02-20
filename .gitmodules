@@ -1,3 +1,6 @@
 [submodule "3rdparty/nanolog"]
 	path = 3rdparty/nanolog
 	url = https://github.com/Iyengar111/NanoLog.git
+[submodule "3rdparty/variadicLogging"]
+	path = 3rdparty/variadicLogging
+	url = https://github.com/carlcook/variadicLogging.git

@@ -1,0 +1,3 @@
+[submodule "3rdparty/nanolog"]
+	path = 3rdparty/nanolog
+	url = https://github.com/Iyengar111/NanoLog.git

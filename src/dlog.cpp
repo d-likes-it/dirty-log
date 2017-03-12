@@ -31,7 +31,6 @@ namespace dlog {
 
     char buffer[bufSize];
     std::memcpy(buffer, sig::signatureString, sig::sizeOfSignatureString);
-    // std::memcpy(buffer, Test::signatureString, sig::sizeOfSignatureString);
   
     char * end = copyArgs(buffer + sig::sizeOfSignatureString, args...);
     *end = 0;

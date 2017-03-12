@@ -1,33 +1,14 @@
 #include <iostream>
 
-template < typename T, typename Tuple >
-struct TupleIndex;
+#include "loggabletypes.hpp"
 
-template < typename T,typename ... Types >
-struct TupleIndex < T, std::tuple < T, Types... > > 
-{
-  static constexpr const std::size_t value = 0;
-};
-
-template < typename T, typename U, typename ... Types >
-struct TupleIndex < T, std::tuple < U, Types... > > 
-{
-  static constexpr const std::size_t value = 1 + TupleIndex < T, std::tuple < Types... > >::value;
-};
-
-struct string_literal_t
-{
-  explicit string_literal_t(char const * s) : m_s(s) {}
-  char const * m_s;
-};
-
-typedef std::tuple < char, uint32_t, uint64_t, int32_t, int64_t, double, string_literal_t, char * > SupportedTypes;
+constexpr unsigned MAX_ARGS = 8;
 
 template<typename T>
 struct alignas(64) LogLineEntry {
   uint8_t typeId;
   T value;
-  LogLineEntry(T v) : typeId(TupleIndex<T, SupportedTypes>::value), value(v) {};
+  LogLineEntry(T v) : typeId(TypeID<T, SupportedTypes>::value), value(v) {};
   
   LogLineEntry(LogLineEntry &&) = default;
   LogLineEntry & operator=(LogLineEntry &&) = default;
@@ -51,14 +32,26 @@ char * copyArgs(char * buffer, Arg& arg, Args& ... args) {
 }
 
 template <typename... Types>
-constexpr unsigned sizeof_args(Types &&...) {
+constexpr unsigned sizeofArgs(Types &&...) {
   return sizeof...(Types);
 }
 
+constexpr size_t constStrLength(char const * str){
+  return (*str == 0) ? 0 : constLength(str + 1) + 1;
+}
+
+
 template <typename... Args>
 void writeLog(char const * formatString, Args... args) {
-  static_assert(sizeof(char const *) + sizeof_args(args...) * 16 < 256, "log line too long");
-  char buffer[sizeof_args(args...) * 16];
+  static_assert(sizeofArgs(args...) < 9, "too many args");
+  static_assert(sizeof(char const *) + sizeofArgs(args...) * 16 < 256, "log line too long");
+
+  char buffer[MAX_ARGS + sizeof_args(args...) * 16];
+
+  auto len = signature<args>::value::size;
+  std::memcpy(buffer, signature<args>::value::str, len);
+  buffer += len;
+  
   char * end = copyArgs(buffer, args...);
   *end = 0;
   std::cout << buffer << std::endl;

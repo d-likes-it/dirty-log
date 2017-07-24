@@ -1,6 +1,5 @@
 #define DLOG_DEBUG
 
-
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -37,12 +36,21 @@ int main() {
   
   //  write_log(logger, "Hello World {} {}", 1.0, 1);
 
-  constexpr auto N = 1000;
-  BenchmarkRollingLogWriter<N, 256> logger;
+  constexpr auto N = 1024;
+  constexpr auto LEN = 64;
+  BenchmarkRollingLogWriter<N, LEN> logger;
 
   measure("", [&]() {run(logger, N);});
 
-  while (logger.front()) {
+  while (char const * buf = logger.front()) {
+    for (auto i = 0; i < LEN; ++i) {
+      if (buf[i] > '0' && buf[i] < 'z') {
+        std::cout << buf[i];
+      } else {
+        std::cout << "0x" << std::hex << (int32_t) buf[i];
+      }
+    }
+    std::cout << std::endl;
     logger.pop();
   }
 }

@@ -1,45 +1,48 @@
+#define DLOG_DEBUG
+
+
 #include <iostream>
 #include <cstring>
+#include <chrono>
 
-#include "signature.hpp"
+#include "dlog.hpp"
+#include "log_writer.hpp"
 
-namespace dlog {
 
-  template <typename Arg>
-  char * copyArg(char * buffer, Arg & t) {
-    static_assert(std::is_trivially_copyable<Arg>::value, "trivially copyable types only");
-    *reinterpret_cast<Arg*>(buffer) = t;
-    return buffer + sizeof(Arg);
+using namespace dlog;
+namespace sc = std::chrono;
+
+template<typename Logger>
+void run(Logger & logger, uint64_t n) {
+  for (uint64_t i = 0; i < n; ++i) {
+    write_log(logger, "Hello World {} {}", i, n);
   }
-
-  char * copyArgs(char * buffer) {
-    return buffer;
-  }
-
-  template <typename Arg, typename... Args>
-  char * copyArgs(char * buffer, Arg& arg, Args& ... args) {
-    buffer = copyArg(buffer, arg);
-    return copyArgs(buffer, args...);
-  }
-
-  template <typename... Args>
-  void writeLog(char const * formatString, Args... args) {
-    typedef signature<Args...> sig;
-    
-    auto const bufSize = sig::sizeOfSignatureString + sig::sizeOfArgs;
-    static_assert(bufSize < 256, "log line too long");
-
-    char buffer[bufSize];
-    std::memcpy(buffer, sig::signatureString, sig::sizeOfSignatureString);
-  
-    char * end = copyArgs(buffer + sig::sizeOfSignatureString, args...);
-    *end = 0;
-    std::cout << buffer << std::endl;
-  }
-
 }
+
+template<typename Fun>
+void measure(std::string label, Fun fun) {
+  auto start = sc::high_resolution_clock::now();
+
+  fun();
+
+  auto end = sc::high_resolution_clock::now();
+  auto dur = sc::duration_cast<sc::nanoseconds>(end - start);
   
+  std::cout << "measured time(" << label << "): " << dur.count() << "ns" << std::endl;
+}
+
+
 int main() {
-  dlog::writeLog("Hello", 1.0, 2, 3);
-}
+  //  StreamLogWriter logger(std::cout);
+  
+  //  write_log(logger, "Hello World {} {}", 1.0, 1);
 
+  constexpr auto N = 1000;
+  BenchmarkRollingLogWriter<N, 256> logger;
+
+  measure("", [&]() {run(logger, N);});
+
+  while (logger.front()) {
+    logger.pop();
+  }
+}

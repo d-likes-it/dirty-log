@@ -20,6 +20,7 @@ The lib has currently no of args + 3 memcopys if my interpretation is correct. (
 
 Clang assembly output for the example writing 2 ints:
 
+```assembly
       *reinterpret_cast<uint8_t *>(pointer) = format_length - 1;
   400b59:	c6 44 04 28 11       	mov    BYTE PTR [rsp+rax*1+0x28],0x11
       pointer += sizeof(uint8_t);
@@ -43,7 +44,7 @@ Clang assembly output for the example writing 2 ints:
 	__builtin_memset(__first, static_cast<unsigned char>(__tmp), __len);
   400b82:	0f 11 4c 04 58       	movups XMMWORD PTR [rsp+rax*1+0x58],xmm1
   400b87:	0f 11 4c 04 4d       	movups XMMWORD PTR [rsp+rax*1+0x4d],xmm1
-
+```
 
 # Outlook
 

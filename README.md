@@ -49,7 +49,7 @@ Clang assembly output for the example writing 2 ints:
 # Outlook
 
 - It should be possible to combine the format and format length into 1 memcopy (assembled into a constexpr string up frnont).
-- It should also be possible to collapse fromat and signature string into a prepared buffer.
+- It should also be possible to collapse fromat and signature string into a constexpr buffer.
 - It should be possible to create a compile time list of format strings. When logging starts that list could be sent as a spciel log message and later on only indices to the format strings need to be published with every write_log call.
 
 

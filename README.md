@@ -4,13 +4,13 @@ Async logging with very little overhead in the caller. And some fun...
 # Motivation
 Logging is used for several reasons in code. One of them is to introspect what is happening in production code that is running. If using log levels the interesting logs are often not available when most useful, i.e. when something unexpected happens. One way to deal with the problem is to always log, which is suitable for some applications. Though this implies that logging is very light weight on the emitting side. 
 
-Several authors proposed how to deal with this problem. Essentially it boils down to not log a string which involves heavy string operations, but to keep the log info gathering as slim as possible. Onm interesting talk I heard was how to do logging with one memory copy operation per argument into a preallocated buffer (see 3rdparty/variadicLogging).
+Several authors proposed how to deal with this problem. Essentially it boils down to not log a string which involves heavy string operations, but to keep the log info gathering as slim as possible. One interesting talk I heard was how to do logging with one memory copy operation per argument into a preallocated buffer (see 3rdparty/variadicLogging).
 
 What is not so nice is that the log formating itself needs to be in the same process (it's a (rather) anonymous dynamic callback).
 
 # Idea
 
-With modern c++ features it should be possible to derive the signature from the log call and transport the arguments in a generic format with the same amount of mem copies. The descriptor string us known at compile time (constexpr).
+With modern c++ features it should be possible to derive the signature from the log call and transport the arguments in a generic format with the same amount of mem copies. The signature descriptor string is known at compile time (constexpr).
 
 The log line is then "sent" into a udp like writer, which drops log messages if resources are exhausted.
 
@@ -48,7 +48,10 @@ Clang assembly output for the example writing 2 ints:
 
 # Outlook
 
-It should be possible to combine the format and format length into 1 memcopy (assembled into a constexpr string up frnont).
+- It should be possible to combine the format and format length into 1 memcopy (assembled into a constexpr string up frnont).
+- It should also be possible to collapse fromat and signature string into a prepared buffer.
+- It should be possible to create a compile time list of format strings. When logging starts that list could be sent as a spciel log message and later on only indices to the format strings need to be published with every write_log call.
+
 
 
 

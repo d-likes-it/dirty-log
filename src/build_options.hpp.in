@@ -1,0 +1,6 @@
+#ifndef __DLOG_BUILD_OPTIONS__
+#define __DLOG_BUILD_OPTIONS__
+
+#cmakedefine CPP_VERSION @CPP_VERSION@
+
+#endif

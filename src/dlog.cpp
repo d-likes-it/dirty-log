@@ -1,56 +1,57 @@
-#define DLOG_DEBUG
+//#define DLOG_DEBUG
 
-#include <iostream>
-#include <cstring>
 #include <chrono>
+#include <cstring>
+#include <iostream>
 
 #include "dlog.hpp"
 #include "log_writer.hpp"
 
-
 using namespace dlog;
 namespace sc = std::chrono;
 
-template<typename Logger>
-void run(Logger & logger, uint64_t n) {
+template <typename Logger> void run(Logger &logger, uint64_t n) {
   for (uint64_t i = 0; i < n; ++i) {
     write_log(logger, "Hello World {} {}", i, n);
   }
 }
 
-template<typename Fun>
-void measure(std::string label, Fun fun) {
-  auto start = sc::high_resolution_clock::now();
+template <typename Fun> long measure(Fun fun) {
+  auto begin = sc::high_resolution_clock::now();
 
   fun();
 
   auto end = sc::high_resolution_clock::now();
-  auto dur = sc::duration_cast<sc::nanoseconds>(end - start);
-  
-  std::cout << "measured time(" << label << "): " << dur.count() << "ns" << std::endl;
+  auto duration =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+
+  return duration;
 }
 
-
 int main() {
-  //  StreamLogWriter logger(std::cout);
-  
-  //  write_log(logger, "Hello World {} {}", 1.0, 1);
-
-  constexpr auto N = 1024;
+  // use 256 cache lines
+  constexpr auto N = 256;
   constexpr auto LEN = 64;
   BenchmarkRollingLogWriter<N, LEN> logger;
 
-  measure("", [&]() {run(logger, N);});
+  constexpr auto CYCLES = 10;
+  auto label = std::string("dlog");
+  auto duration = measure([&]() { run(logger, CYCLES); });
 
-  while (char const * buf = logger.front()) {
+  /*
+  while (char const *buf = logger.front()) {
     for (auto i = 0; i < LEN; ++i) {
       if (buf[i] > '0' && buf[i] < 'z') {
         std::cout << buf[i];
       } else {
-        std::cout << "0x" << std::hex << (int32_t) buf[i];
+        std::cout << "0x" << std::hex << (int32_t)buf[i];
       }
     }
     std::cout << std::endl;
     logger.pop();
   }
+  */
+  std::cout << "measured time (" << label << ", " << CYCLES
+            << "): " << duration / 1000000000.0
+            << "s, per iteration: " << duration / CYCLES << "ns" << std::endl;
 }

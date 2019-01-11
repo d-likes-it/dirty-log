@@ -1,36 +1,36 @@
 #ifndef __DLOG_DLOG__
 #define __DLOG_DLOG__
 
-#include "signature.hpp"
 #include "copy_args.hpp"
+#include "format_signature.hpp"
+#include "len_prefixed_buffer.hpp"
 
 namespace dlog {
 
-  // the format string itself must be a compile time defined char array (constexpr)
-  template <typename Logger, uint8_t format_length, typename... Args>
-  void write_log(Logger & writer, char const (&format)[format_length], Args... args) {
-    using sig_traits = signature_traits<Args...>;
-    using sig_str = signature_string<Args...>;
+// the format string itself must be a compile time defined char array
+// (constexpr)
+struct _write_log {
 
-    static_assert(format_length > 0, "empty format string");
-    static_assert(((format_length - 1)
-                   + sig_str::size
-                   + sig_traits::size
-                   + 3) < Logger::traits::alignment, "log line too long");
+  template <typename Logger, typename... Args>
+  static void emit(Logger &writer, Args... args) {
+    using args_traits = array_traits<Args...>;
+    using format_sig = dlog::format_signature<Args...>;
 
-    char * buffer = writer.prepare();
+    static_assert(format_sig::size + args_traits::size <
+                      Logger::traits::alignment,
+                  "log line too long");
+    static_assert(format_sig::size == args_traits::count + 1,
+                  "length mismatch");
+
+    char *buffer = writer.prepare();
     {
-      char * pointer = buffer;
-      
-      *reinterpret_cast<uint8_t *>(pointer) = format_length - 1;
-      pointer += sizeof(uint8_t);
-      std::memcpy(pointer, format, format_length - 1);
-      pointer += format_length - 1;
-      
-      std::memcpy(pointer, sig_str::value, sig_str::size);
-      pointer += sig_str::size;
-      
-      char * end = copy_args(pointer, args...);
+      char *pointer = buffer;
+      // constexpr auto descriptor = format_sig(format);
+
+      std::memcpy(pointer, &format_sig::value[0], format_sig::size);
+      pointer += format_sig::size;
+
+      char *end = copy_args(pointer, args...);
 #ifdef DLOG_DEBUG
       std::fill(end, buffer + Logger::traits::alignment, '\0');
 #else
@@ -40,9 +40,9 @@ namespace dlog {
 
     writer.emit();
   }
+};
+} // namespace dlog
 
-}
+#define write_log(l, f, ...) dlog::_write_log().emit(l, __VA_ARGS__)
 
 #endif
-
-

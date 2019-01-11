@@ -4,3 +4,6 @@
 [submodule "3rdparty/variadicLogging"]
 	path = 3rdparty/variadicLogging
 	url = https://github.com/carlcook/variadicLogging.git
+[submodule "3rdparty/typestring"]
+	path = 3rdparty/typestring
+	url = https://github.com/irrequietus/typestring.git

@@ -1,10 +1,8 @@
 #include <cstring>
-#include <iostream>
 
 namespace dlog {
 
 template <typename Arg> char *copy_arg(char *buffer, Arg &t) {
-  std::cout << t << std::endl;
   static_assert(std::is_trivially_copyable<Arg>::value,
                 "trivially copyable types only");
   *reinterpret_cast<Arg *>(buffer) = t;

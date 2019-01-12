@@ -12,7 +12,7 @@ namespace sc = std::chrono;
 
 template <typename Logger> void run(Logger &logger, uint64_t n) {
   for (uint64_t i = 0; i < n; ++i) {
-    write_log(logger, "Hello World {} {}", i, n);
+    write_log(logger, "Hello World {} {}", i*1.0, n);
   }
 }
 
@@ -34,7 +34,7 @@ int main() {
   constexpr auto LEN = 64;
   BenchmarkRollingLogWriter<N, LEN> logger;
 
-  constexpr auto CYCLES = 10;
+  constexpr auto CYCLES = 1000000;
   auto label = std::string("dlog");
   auto duration = measure([&]() { run(logger, CYCLES); });
 

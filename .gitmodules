@@ -7,3 +7,6 @@
 [submodule "3rdparty/typestring"]
 	path = 3rdparty/typestring
 	url = https://github.com/irrequietus/typestring.git
+[submodule "3rdparty/llcpp"]
+	path = 3rdparty/llcpp
+	url = https://github.com/blapid/llcpp.git

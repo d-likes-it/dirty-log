@@ -8,9 +8,9 @@ Several authors proposed how to deal with this problem. Essentially it boils dow
 
 # Prior Work
 
-- One interesting talk I heard was how to do logging with one memory copy operation per argument into a preallocated buffer (see 3rdparty/variadicLogging). What is not so nice is that the log formating itself needs to be in the same process (it's a (rather) anonymous dynamic callback).
+* One interesting talk I heard was how to do logging with one memory copy operation per argument into a preallocated buffer (see 3rdparty/variadicLogging). What is not so nice is that the log formating itself needs to be in the same process (it's a (rather) anonymous dynamic callback).
 
-- llcpp (see 3rdparty/llcpp) came up with a idea to postpone the formatting to when the log message is needed by narrowing down the format possibilities at emit, decoding using a script.
+* llcpp (see 3rdparty/llcpp) came up with a idea to postpone the formatting to when the log message is needed by narrowing down the format possibilities at emit, decoding using a script.
 
 # Idea
 
@@ -39,10 +39,10 @@ _ZN4dlog8copy_argImEEPcS1_RT_():
 
 # Outlook
 
-- [done] It should be possible to combine the format and format length into 1 memcopy (assembled into a constexpr string up front).
-- [done] It should also be possible to collapse fromat and signature string into a constexpr buffer.
-- It should be possible to create a compile time list of format strings. When logging starts that list could be sent as a special log message and later on only indices to the format strings need to be published with every write_log call.
-- Integrate it into one of the known logging frameworks and see if performance increases there.
-  - emit site is relived of work
-  - at the other end of ring buffer some optimisations can be done, such as omitting duplicated log lines
+* [x] It should be possible to combine the format and format length into 1 memcopy (assembled into a constexpr string up front).
+* [x] It should also be possible to collapse fromat and signature string into a constexpr buffer.
+* [] It should be possible to create a compile time list of format strings. When logging starts that list could be sent as a special log message and later on only indices to the format strings need to be published with every write_log call.
+* [] Integrate it into one of the known logging frameworks and see if performance increases there.
+** emit site is relived of work
+** at the other end of ring buffer some optimisations can be done, such as omitting duplicated log lines
 
